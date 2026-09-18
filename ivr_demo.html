@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AgriStack Procurement Line</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green-deep:#2D5233;
+    --green-soft:#3E6B47;
+    --gold:#C08A28;
+    --gold-soft:#E4C77E;
+    --parchment:#F6F2E7;
+    --parchment-dim:#EDE6D4;
+    --ink:#1E1E1E;
+    --ink-soft:#5B5648;
+    --clay:#B23A32;
+    --line:#D8CFB6;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(45,82,51,0.08), transparent 45%),
+      radial-gradient(circle at 90% 85%, rgba(192,138,40,0.10), transparent 45%),
+      var(--parchment);
+    font-family:'IBM Plex Sans', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:48px 20px;
+  }
+
+  .stage{
+    display:flex;
+    gap:40px;
+    align-items:flex-start;
+    flex-wrap:wrap;
+    max-width:920px;
+  }
+
+  .label-block{
+    width:100%;
+    text-align:center;
+    margin-bottom:8px;
+  }
+  .label-block h1{
+    font-family:'Source Serif 4', serif;
+    font-size:28px;
+    font-weight:600;
+    color:var(--green-deep);
+    margin:0 0 6px 0;
+  }
+  .label-block p{
+    margin:0;
+    color:var(--ink-soft);
+    font-size:14.5px;
+  }
+
+  /* ---- Phone ---- */
+  .phone{
+    width:300px;
+    height:600px;
+    background:linear-gradient(180deg,#25482c,var(--green-deep));
+    border-radius:36px;
+    padding:14px;
+    box-shadow:0 20px 40px rgba(45,82,51,0.25), inset 0 0 0 1px rgba(255,255,255,0.06);
+    position:relative;
+  }
+  .phone-notch{
+    position:absolute;
+    top:14px; left:50%;
+    transform:translateX(-50%);
+    width:90px; height:16px;
+    background:#173420;
+    border-radius:10px;
+  }
+  .screen{
+    background:var(--parchment);
+    height:100%;
+    border-radius:24px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    padding-top:30px;
+  }
+
+  /* idle call screen */
+  .call-card{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    text-align:center;
+    gap:6px;
+  }
+  .call-eyebrow{
+    font-size:12px;
+    letter-spacing:0.02em;
+    color:var(--ink-soft);
+  }
+  .call-number{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:26px;
+    font-weight:600;
+    color:var(--green-deep);
+    margin:6px 0 2px 0;
+  }
+  .call-sub{
+    font-size:13px;
+    color:var(--ink-soft);
+    max-width:220px;
+    line-height:1.4;
+  }
+  .call-status{
+    font-size:13px;
+    color:var(--gold);
+    font-weight:600;
+    min-height:18px;
+    margin-top:10px;
+  }
+
+  .call-btn{
+    margin-top:22px;
+    width:64px; height:64px;
+    border-radius:50%;
+    background:var(--green-deep);
+    border:none;
+    color:#fff;
+    font-size:24px;
+    cursor:pointer;
+    box-shadow:0 8px 18px rgba(45,82,51,0.35);
+    transition:transform 0.15s ease, background 0.15s ease;
+  }
+  .call-btn:hover{ transform:scale(1.06); background:var(--green-soft); }
+  .call-btn:active{ transform:scale(0.96); }
+  .call-btn[disabled]{ opacity:0.5; cursor:default; transform:none; }
+
+  /* transcript (in-call) view */
+  .transcript-wrap{
+    flex:1;
+    display:none;
+    flex-direction:column;
+    min-height:0;
+  }
+  .call-topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 16px;
+    border-bottom:1px solid var(--line);
+    background:var(--parchment-dim);
+  }
+  .call-topbar .who{
+    font-size:13px;
+    font-weight:600;
+    color:var(--green-deep);
+  }
+  .call-topbar .timer{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  .end-btn{
+    border:none;
+    background:var(--clay);
+    color:#fff;
+    font-size:11px;
+    font-weight:600;
+    padding:5px 10px;
+    border-radius:14px;
+    cursor:pointer;
+  }
+
+  .transcript{
+    flex:1;
+    overflow-y:auto;
+    padding:14px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .bubble{
+    max-width:88%;
+    padding:9px 12px;
+    border-radius:12px;
+    font-size:13px;
+    line-height:1.42;
+  }
+  .bubble.ivr{
+    align-self:flex-start;
+    background:#fff;
+    border:1px solid var(--line);
+    border-bottom-left-radius:3px;
+  }
+  .bubble.you{
+    align-self:flex-end;
+    background:var(--green-deep);
+    color:#fff;
+    border-bottom-right-radius:3px;
+  }
+  .bubble.sms{
+    align-self:center;
+    background:var(--gold-soft);
+    border:1px solid var(--gold);
+    font-size:12.5px;
+    text-align:left;
+    white-space:pre-line;
+  }
+
+  .input-row{
+    display:flex;
+    gap:6px;
+    padding:10px 12px 14px 12px;
+    border-top:1px solid var(--line);
+    background:var(--parchment-dim);
+  }
+  .input-row input{
+    flex:1;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:8px 10px;
+    font-size:13px;
+    font-family:'IBM Plex Sans', sans-serif;
+    background:#fff;
+  }
+  .input-row button{
+    border:none;
+    background:var(--green-deep);
+    color:#fff;
+    border-radius:10px;
+    padding:0 14px;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .keypad-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    padding:0 12px 12px 12px;
+    background:var(--parchment-dim);
+  }
+  .key{
+    flex:1;
+    min-width:70px;
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:10px;
+    padding:8px 6px;
+    font-size:12px;
+    font-weight:600;
+    color:var(--green-deep);
+    cursor:pointer;
+    text-align:center;
+  }
+  .key:hover{ background:var(--parchment); }
+
+  /* ---- Dashboard toggle ---- */
+  .side{
+    flex:1;
+    min-width:320px;
+  }
+  .dash-card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:18px 20px;
+    box-shadow:0 12px 30px rgba(30,30,30,0.06);
+  }
+  .dash-card h2{
+    font-family:'Source Serif 4', serif;
+    font-size:18px;
+    margin:0 0 4px 0;
+    color:var(--green-deep);
+  }
+  .dash-card p.hint{
+    margin:0 0 14px 0;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12.5px;
+  }
+  th,td{
+    text-align:left;
+    padding:7px 6px;
+    border-bottom:1px solid var(--line);
+  }
+  th{
+    color:var(--ink-soft);
+    font-weight:600;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+  }
+  .status-pill{
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:10px;
+    font-size:11px;
+    font-weight:600;
+  }
+  .status-pill.Confirmed{ background:#E3EFE4; color:var(--green-deep); }
+  .status-pill.Waitlisted{ background:#F6E4C9; color:var(--gold); }
+  .empty-row{
+    color:var(--ink-soft);
+    font-size:13px;
+    padding:14px 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="label-block">
+    <h1>Farmer Procurement Line</h1>
+    <p>Simulated demo — call flow, booking, and live procurement dashboard</p>
+  </div>
+
+  <!-- PHONE -->
+  <div class="phone">
+    <div class="phone-notch"></div>
+    <div class="screen">
+
+      <!-- idle screen -->
+      <div class="call-card" id="idleCard">
+        <div class="call-eyebrow">Toll-free · works on any phone</div>
+        <div class="call-number">1800-419-2026</div>
+        <div class="call-sub">Dial to check crop prices, book a pickup slot, or track your procurement status.</div>
+        <div class="call-status" id="callStatus">&nbsp;</div>
+        <button class="call-btn" id="callBtn" title="Call">📞</button>
+      </div>
+
+      <!-- in-call transcript -->
+      <div class="transcript-wrap" id="callView">
+        <div class="call-topbar">
+          <span class="who">AgriStack Procurement Line</span>
+          <span class="timer" id="callTimer">00:00</span>
+          <button class="end-btn" id="endBtn">End Call</button>
+        </div>
+        <div class="transcript" id="transcript"></div>
+        <div class="input-row" id="inputRow" style="display:none;">
+          <input type="text" id="textInput" placeholder="Type here...">
+          <button id="sendBtn">Send</button>
+        </div>
+        <div class="keypad-row" id="keypadRow" style="display:none;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="side">
+    <div class="dash-card">
+      <h2>Procurement Dashboard</h2>
+      <p class="hint">Live bookings appear here as calls complete — this is what the centre officer sees.</p>
+      <table>
+        <thead>
+          <tr><th>Token</th><th>Farmer</th><th>Crop</th><th>Qty (t)</th><th>Window</th><th>Status</th></tr>
+        </thead>
+        <tbody id="bookingsBody">
+          <tr><td colspan="6" class="empty-row">No bookings yet — make a call to create one.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- fake AgriStack data (mirrors the Python version) ----------
+const AGRISTACK = {
+  "1001": { name:"Ramesh Kumar", village:"Kheda", crop:"Paddy", tonnes:5 },
+  "1002": { name:"Sita Devi", village:"Rampur", crop:"Wheat", tonnes:3 },
+  "1003": { name:"Mohan Lal", village:"Bhiarpur", crop:"Maize", tonnes:7 },
+};
+const PRICES = { Paddy:2310, Wheat:2125, Maize:1962 };
+const SLOT_CAPACITY = 5;
+
+let bookings = [];
+let callSeconds = 0;
+let timerInterval = null;
+
+const idleCard = document.getElementById('idleCard');
+const callView = document.getElementById('callView');
+const callBtn = document.getElementById('callBtn');
+const callStatus = document.getElementById('callStatus');
+const transcript = document.getElementById('transcript');
+const inputRow = document.getElementById('inputRow');
+const textInput = document.getElementById('textInput');
+const sendBtn = document.getElementById('sendBtn');
+const keypadRow = document.getElementById('keypadRow');
+const endBtn = document.getElementById('endBtn');
+const callTimer = document.getElementById('callTimer');
+
+function addBubble(text, type){
+  const b = document.createElement('div');
+  b.className = 'bubble ' + type;
+  b.textContent = text;
+  transcript.appendChild(b);
+  transcript.scrollTop = transcript.scrollHeight;
+  return b;
+}
+
+function clearInputArea(){
+  inputRow.style.display = 'none';
+  keypadRow.style.display = 'none';
+  keypadRow.innerHTML = '';
+  textInput.value = '';
+}
+
+function showTextInput(placeholder, onSubmit){
+  clearInputArea();
+  inputRow.style.display = 'flex';
+  textInput.placeholder = placeholder;
+  textInput.focus();
+  const handler = () => {
+    const val = textInput.value.trim();
+    if(!val) return;
+    addBubble(val, 'you');
+    clearInputArea();
+    sendBtn.removeEventListener('click', handler);
+    onSubmit(val);
+  };
+  sendBtn.addEventListener('click', handler);
+  textInput.onkeydown = (e) => { if(e.key === 'Enter') handler(); };
+}
+
+function showKeypad(options, onSubmit){
+  // options: array of {key, label}
+  clearInputArea();
+  keypadRow.style.display = 'flex';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'key';
+    btn.textContent = opt.key + '. ' + opt.label;
+    btn.onclick = () => {
+      addBubble('Pressed ' + opt.key, 'you');
+      clearInputArea();
+      onSubmit(opt.key);
+    };
+    keypadRow.appendChild(btn);
+  });
+}
+
+function startTimer(){
+  callSeconds = 0;
+  timerInterval = setInterval(() => {
+    callSeconds++;
+    const m = String(Math.floor(callSeconds/60)).padStart(2,'0');
+    const s = String(callSeconds%60).padStart(2,'0');
+    callTimer.textContent = m + ':' + s;
+  }, 1000);
+}
+function stopTimer(){
+  clearInterval(timerInterval);
+}
+
+function renderDashboard(){
+  const body = document.getElementById('bookingsBody');
+  if(bookings.length === 0){
+    body.innerHTML = '<tr><td colspan="6" class="empty-row">No bookings yet — make a call to create one.</td></tr>';
+    return;
+  }
+  body.innerHTML = bookings.map(b => `
+    <tr>
+      <td>${b.token}</td>
+      <td>${b.name}</td>
+      <td>${b.crop}</td>
+      <td>${b.qty}</td>
+      <td>${b.window}</td>
+      <td><span class="status-pill ${b.status}">${b.status}</span></td>
+    </tr>
+  `).join('');
+}
+
+function countInWindow(win){
+  return bookings.filter(b => b.window === win).length;
+}
+
+// ---------- call flow ----------
+callBtn.addEventListener('click', () => {
+  callBtn.disabled = true;
+  callStatus.textContent = 'Dialling...';
+  setTimeout(() => { callStatus.textContent = 'Connecting...'; }, 700);
+  setTimeout(() => {
+    idleCard.style.display = 'none';
+    callView.style.display = 'flex';
+    transcript.innerHTML = '';
+    startTimer();
+    addBubble("Welcome to the AgriStack Procurement Line. Please enter your enrolment number.", 'ivr');
+    showTextInput('Enter enrolment number...', handleEnrolment);
+  }, 1500);
+});
+
+function endCall(){
+  stopTimer();
+  callBtn.disabled = false;
+  callStatus.textContent = '';
+  callView.style.display = 'none';
+  idleCard.style.display = 'flex';
+  clearInputArea();
+}
+endBtn.addEventListener('click', endCall);
+
+function handleEnrolment(value){
+  const profile = AGRISTACK[value];
+  if(!profile){
+    addBubble("We could not find that enrolment number. Please contact your local agent.", 'ivr');
+    setTimeout(endCall, 2200);
+    return;
+  }
+  addBubble(`Hello ${profile.name} from ${profile.village}.`, 'ivr');
+  setTimeout(() => {
+    addBubble(`Your registered crop: ${profile.crop}, estimated ${profile.tonnes} tonnes.`, 'ivr');
+    setTimeout(() => {
+      addBubble("Please choose an option:", 'ivr');
+      showKeypad([
+        {key:'1', label:'Book Pickup'},
+        {key:'2', label:'Check Price'},
+        {key:'3', label:'Speak to Agent'},
+      ], (choice) => handleMenu(choice, profile));
+    }, 500);
+  }, 500);
+}
+
+function handleMenu(choice, profile){
+  if(choice === '1'){
+    addBubble("Confirm actual quantity in tonnes:", 'ivr');
+    showTextInput('e.g. 5', (qty) => {
+      addBubble("Choose pickup window:", 'ivr');
+      showKeypad([
+        {key:'1', label:'Morning'},
+        {key:'2', label:'Midday'},
+        {key:'3', label:'Afternoon'},
+      ], (winChoice) => finishBooking(profile, qty, winChoice));
+    });
+  } else if(choice === '2'){
+    const price = PRICES[profile.crop] || 2000;
+    addBubble(`Current price for ${profile.crop} is ₹${price} per quintal at your nearest mandi.`, 'ivr');
+    setTimeout(endCall, 3000);
+  } else {
+    addBubble("Connecting you to an agent...", 'ivr');
+    setTimeout(endCall, 2200);
+  }
+}
+
+function finishBooking(profile, qty, winChoice){
+  const windows = {'1':'Morning','2':'Midday','3':'Afternoon'};
+  const win = windows[winChoice] || 'Morning';
+  const count = countInWindow(win);
+  const status = count >= SLOT_CAPACITY ? 'Waitlisted' : 'Confirmed';
+  const token = count + 1;
+  const bookingRef = 'BK' + String(bookings.length + 1).padStart(4, '0');
+
+  bookings.push({
+    token, name: profile.name, crop: profile.crop,
+    qty, window: win, status, ref: bookingRef
+  });
+  renderDashboard();
+
+  addBubble(
+    status === 'Confirmed'
+      ? `Booking confirmed. Your token is ${token} for the ${win} window.`
+      : `The ${win} window is full — you've been added to the waitlist.`,
+    'ivr'
+  );
+
+  setTimeout(() => {
+    addBubble(
+      `Dear ${profile.name},\nBooking Ref: ${bookingRef}   Token: ${token}\nWindow: ${win}   Status: ${status}\nCrop: ${profile.crop}   Qty: ${qty}t`,
+      'sms'
+    );
+    setTimeout(endCall, 3200);
+  }, 700);
+}
+</script>
+</body>
+</html>
